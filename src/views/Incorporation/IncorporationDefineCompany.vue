@@ -77,7 +77,10 @@
         </div>
       </header>
 
-      <div :class="{ 'invalid-section': getShowErrors && !hasValidCooperativeType }">
+      <div
+        class="mt-4"
+        :class="{ 'invalid-section': getShowErrors && !hasValidCooperativeType }"
+      >
         <v-card
           flat
           class="step-container"
@@ -106,7 +109,10 @@
         </p>
       </header>
 
-      <div :class="{ 'invalid-section': getShowErrors && !addressFormValid }">
+      <div
+        class="mt-4"
+        :class="{ 'invalid-section': getShowErrors && !addressFormValid }"
+      >
         <OfficeAddresses
           :showErrors="getShowErrors"
           :inputAddresses="getOfficeAddresses"
@@ -131,7 +137,7 @@
 
       <v-card
         flat
-        class="py-8 px-6"
+        class="mt-4 py-8 px-6"
         :class="{ 'invalid-section': getShowErrors && !businessContactFormValid }"
       >
         <BusinessContactInfo
@@ -159,7 +165,7 @@
 
       <v-card
         flat
-        class="step-container"
+        class="mt-4 step-container"
       >
         <FolioNumber
           :initialValue="getFolioNumber"
