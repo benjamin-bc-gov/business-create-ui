@@ -57,7 +57,6 @@
       @retry="fetchData()"
     />
 
-
     <!-- FUTURE: pass actual filing name -->
     <PaymentErrorDialog
       attach="#app"
