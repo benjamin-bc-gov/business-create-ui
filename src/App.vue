@@ -501,7 +501,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
     return !this.$route.meta.noStepper
   }
 
-
   /** Get banner text. */
   get bannerText (): string {
     const bannerText: string = GetFeatureFlag('banner-text')
@@ -615,7 +614,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
       Navigate(dashboardUrl)
     })
   }
-
 
   /** The list of completing parties. */
   private getCompletingParties (): CompletingPartyIF {
@@ -1388,7 +1386,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
 
         // fetch the data
         await this.fetchData()
-
       }
     }
 
