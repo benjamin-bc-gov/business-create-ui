@@ -459,7 +459,10 @@ export default class FilingTemplateMixin extends Mixins(AmalgamationMixin, DateM
       filing.header.effectiveDate = this.dateToApi(this.getEffectiveDateTime.effectiveDate)
     }
 
-    if (IsAuthorized(AuthorizedActions.STAFF_PAYMENT)) {
+    // NB: don't persist staff payment during the authorization stage. The zero-fee shown there
+    // is display-only (see parseContinuationInDraft); persisting waiveFees=true here leaks into
+    // the draft header and is later restored as "No Fee" in the Continuation Application. See #33757.
+    if (IsAuthorized(AuthorizedActions.STAFF_PAYMENT) && !this.isContinuationInAuthorization) {
       // Add staff payment data.
       this.buildStaffPayment(filing)
     }
