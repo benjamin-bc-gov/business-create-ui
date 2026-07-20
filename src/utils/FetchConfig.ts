@@ -73,13 +73,6 @@ export function FetchConfig (): void {
   const keycloakClientId: string = import.meta.env.VUE_APP_KEYCLOAK_CLIENTID;
   (<any>window).keycloakClientId = keycloakClientId
 
-  const iaSurveyId: string = import.meta.env.VUE_APP_IA_SURVEY_ID
-  // NB: set empty string if iaSurveyId is falsy (undefined, null or 0)
-  sessionStorage.setItem('IA_SURVEY_ID', iaSurveyId || '')
-
-  const hotjarId: string = import.meta.env.VUE_APP_HOTJAR_ID;
-  (<any>window).hotjarId = hotjarId
-
   const addressCompleteKey: string = import.meta.env.VUE_APP_ADDRESS_COMPLETE_KEY;
   (<any>window).addressCompleteKey = addressCompleteKey
 

@@ -11,7 +11,6 @@ import { createPinia, PiniaVuePlugin } from 'pinia'
 import Affix from 'vue-affix'
 import Vue2Filters from 'vue2-filters' // needed by SbcFeeSummary
 import VueObserveVisibility from 'vue-observe-visibility' // added to help with rendering of text area heights properly
-import Hotjar from 'vue-hotjar'
 
 // Base App
 // NB: must come before style imports
@@ -50,13 +49,6 @@ async function start () {
 
   // fetch config and set it locally
   FetchConfig()
-
-  // initialize Hotjar
-  const hotjarId: string = (window as any).hotjarId
-  if (hotjarId) {
-    console.info('Initializing Hotjar...') // eslint-disable-line no-console
-    Vue.use(Hotjar, { id: hotjarId })
-  }
 
   // configure KeyCloak Service
   console.info('Starting Keycloak service...') // eslint-disable-line no-console

@@ -57,14 +57,6 @@
       @retry="fetchData()"
     />
 
-    <FilingSurveyDialog
-      attach="#app"
-      :dialog="filingSurveyDialog"
-      @no="filingSurveyDialog = false"
-      @yes="filingSurveyDialog = false; launchFilingSurvey()"
-      @doNotShow="doNotShowSurvey($event)"
-    />
-
     <!-- FUTURE: pass actual filing name -->
     <PaymentErrorDialog
       attach="#app"
@@ -373,7 +365,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
   accountAuthorizationDialog = false
   accountContactMissingDialog = false
   fetchErrorDialog = false
-  filingSurveyDialog = false
   filingNotExistDialog = false
   invalidRouteDialog = false
   paymentErrorDialog = false
@@ -482,7 +473,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
       this.accountContactMissingDialog ||
       this.invalidFilingDialog ||
       this.fetchErrorDialog ||
-      this.filingSurveyDialog ||
       this.filingNotExistDialog ||
       this.invalidRouteDialog ||
       this.paymentErrorDialog ||
@@ -509,11 +499,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
   /** Whether to use stepper view. */
   get isStepperView (): boolean {
     return !this.$route.meta.noStepper
-  }
-
-  /** The current IA survey id, or zero if empty. */
-  get iaSurveyId (): number {
-    return +sessionStorage.getItem('IA_SURVEY_ID')
   }
 
   /** Get banner text. */
@@ -628,28 +613,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
       // navigate to dashboard
       Navigate(dashboardUrl)
     })
-  }
-
-  /** Opens Auth Web in a new tab with the survey query param. */
-  launchFilingSurvey (): void {
-    // safety check
-    if (this.iaSurveyId > 0) {
-      const url = `${sessionStorage.getItem('AUTH_WEB_URL')}?survey=${this.iaSurveyId}`
-      this.window.open(url, '_blank', 'noreferrer')
-    }
-  }
-
-  /** Called to update "do not show again" state. */
-  doNotShowSurvey (doNotShow: boolean): void {
-    // safety check
-    if (this.iaSurveyId > 0) {
-      if (doNotShow) {
-        // save id of survey to hide
-        localStorage.setItem('HIDE_SURVEY', this.iaSurveyId.toString())
-      } else {
-        localStorage.removeItem('HIDE_SURVEY')
-      }
-    }
   }
 
   /** The list of completing parties. */
@@ -1172,7 +1135,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
     this.accountAuthorizationDialog = false
     this.accountContactMissingDialog = false
     this.fetchErrorDialog = false
-    this.filingSurveyDialog = false
     this.paymentErrorDialog = false
     this.saveErrorDialog = false
     this.fileAndPayInvalidNameRequestDialog = false
@@ -1424,19 +1386,6 @@ export default class App extends Mixins(CommonMixin, DateMixin, FilingTemplateMi
 
         // fetch the data
         await this.fetchData()
-
-        // show survey dialog...
-        // - if this is an Incorporation Application filing
-        // - if the IA Survey ID is configured
-        // - if the survey id hasn't been saved
-        if (this.isIncorporationFiling) {
-          if (this.iaSurveyId > 0) {
-            const savedId = +localStorage.getItem('HIDE_SURVEY')
-            if (savedId !== this.iaSurveyId) {
-              this.filingSurveyDialog = true
-            }
-          }
-        }
       }
     }
 
