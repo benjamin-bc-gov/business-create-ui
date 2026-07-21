@@ -333,7 +333,7 @@
                   <v-text-field
                     id="person__first-name"
                     ref="signingPersonGivenNameRef"
-                    v-model="signingPerson.givenName"
+                    v-model.trim="signingPerson.givenName"
                     filled
                     class="item"
                     label="First Name"
@@ -342,7 +342,7 @@
                   <v-text-field
                     id="person__middle-name"
                     ref="signingPersonMiddleNameRef"
-                    v-model="signingPerson.additionalName"
+                    v-model.trim="signingPerson.additionalName"
                     filled
                     class="item"
                     label="Middle Name (Optional)"
@@ -351,7 +351,7 @@
                   <v-text-field
                     id="person__last-name"
                     ref="signingPersonFamilyNameRef"
-                    v-model="signingPerson.familyName"
+                    v-model.trim="signingPerson.familyName"
                     filled
                     class="item"
                     label="Last Name"
