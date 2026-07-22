@@ -459,7 +459,10 @@ export default class FilingTemplateMixin extends Mixins(AmalgamationMixin, DateM
       filing.header.effectiveDate = this.dateToApi(this.getEffectiveDateTime.effectiveDate)
     }
 
-    if (IsAuthorized(AuthorizedActions.STAFF_PAYMENT)) {
+    // NB: don't persist staff payment during the authorization stage. The zero-fee shown there
+    // is display-only (see parseContinuationInDraft); persisting waiveFees=true here leaks into
+    // the draft header and is later restored as "No Fee" in the Continuation Application. See #33757.
+    if (IsAuthorized(AuthorizedActions.STAFF_PAYMENT) && !this.isContinuationInAuthorization) {
       // Add staff payment data.
       this.buildStaffPayment(filing)
     }
@@ -594,7 +597,13 @@ export default class FilingTemplateMixin extends Mixins(AmalgamationMixin, DateM
     } else if (IsAuthorized(AuthorizedActions.STAFF_PAYMENT)) {
       // otherwise, restore normal Staff Payment data
       // NB: Staff Payment is mutually exclusive with Folio Number
-      this.parseStaffPayment(draftFiling)
+      // NB: ignore a "waiveFees" flag in the draft — drafts saved during the authorization
+      //     stage carry a leaked waiveFees=true, which made the Continuation Application
+      //     default to "No Fee" / $0.00 (see #33757)
+      this.parseStaffPayment({
+        ...draftFiling,
+        header: { ...draftFiling.header, waiveFees: false }
+      } as any)
     }
 
     // NB: Folio Number is mutually exclusive with Staff Payment
