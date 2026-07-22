@@ -2,11 +2,13 @@ import { wrapperFactory } from '../vitest-wrapper-factory'
 import MixinTester from '@/mixin-tester.vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { useStore } from '@/store/store'
-import { BusinessTypes, PartyTypes, RestorationTypes, RoleTypes } from '@/enums'
+import { AuthorizationRoles, BusinessTypes, FilingStatus, FilingTypes, PartyTypes, RestorationTypes, RoleTypes,
+  StaffPaymentOptions } from '@/enums'
 import { CorpTypeCd } from '@bcrs-shared-components/corp-type-module'
 import { NameRequestIF } from '@/interfaces'
 import { CorrectNameOptions } from '@bcrs-shared-components/enums'
 import * as FeatureFlags from '@/utils/feature-flag-utils'
+import { setAuthRole } from '../set-auth-role'
 
 setActivePinia(createPinia())
 const store = useStore()
@@ -606,5 +608,62 @@ describe('Restoration Filing', () => {
     const filing = wrapper.vm.buildRestorationFiling()
 
     expect(filing.restoration.contactPoint.extension).toBeUndefined()
+  })
+})
+
+describe('Continuation In Filing - staff payment', () => {
+  let wrapper: any
+
+  beforeEach(() => {
+    wrapper = wrapperFactory(MixinTester, null, {})
+    store.setEntityType(CorpTypeCd.BEN_CONTINUE_IN)
+    store.setFilingType(FilingTypes.CONTINUATION_IN)
+    setAuthRole(store, AuthorizationRoles.STAFF)
+  })
+
+  afterEach(() => {
+    setAuthRole(store, null)
+    wrapper.destroy()
+  })
+
+  it('does not persist staff payment during the authorization stage', () => {
+    store.setFilingStatus(FilingStatus.DRAFT) // authorization stage
+    // store shows zero fees during authorization (display-only)
+    store.stateModel.staffPaymentStep.staffPayment.option = StaffPaymentOptions.NO_FEE
+
+    const filing = wrapper.vm.buildContinuationInFiling()
+
+    expect(filing.header.waiveFees).toBeUndefined()
+  })
+
+  it('persists staff payment during the application stage', () => {
+    store.setFilingStatus(FilingStatus.APPROVED) // application stage
+    store.stateModel.staffPaymentStep.staffPayment.option = StaffPaymentOptions.NO_FEE
+
+    const filing = wrapper.vm.buildContinuationInFiling()
+
+    expect(filing.header.waiveFees).toBe(true)
+  })
+
+  it('shows zero fees when parsing an authorization stage draft', () => {
+    store.setFilingStatus(FilingStatus.DRAFT) // authorization stage
+
+    wrapper.vm.parseContinuationInDraft({
+      header: { filingId: 123 },
+      continuationIn: { nameRequest: { legalType: CorpTypeCd.BEN_CONTINUE_IN } }
+    })
+
+    expect(store.getStaffPaymentStep.staffPayment.option).toBe(StaffPaymentOptions.NO_FEE)
+  })
+
+  it('ignores a leaked waiveFees flag when parsing an application stage draft', () => {
+    store.setFilingStatus(FilingStatus.APPROVED) // application stage
+
+    wrapper.vm.parseContinuationInDraft({
+      header: { filingId: 123, waiveFees: true },
+      continuationIn: { nameRequest: { legalType: CorpTypeCd.BEN_CONTINUE_IN } }
+    })
+
+    expect(store.getStaffPaymentStep.staffPayment.option).toBe(StaffPaymentOptions.NONE)
   })
 })

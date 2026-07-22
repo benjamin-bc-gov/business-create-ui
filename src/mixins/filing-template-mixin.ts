@@ -597,7 +597,13 @@ export default class FilingTemplateMixin extends Mixins(AmalgamationMixin, DateM
     } else if (IsAuthorized(AuthorizedActions.STAFF_PAYMENT)) {
       // otherwise, restore normal Staff Payment data
       // NB: Staff Payment is mutually exclusive with Folio Number
-      this.parseStaffPayment(draftFiling)
+      // NB: ignore a "waiveFees" flag in the draft — drafts saved during the authorization
+      //     stage carry a leaked waiveFees=true, which made the Continuation Application
+      //     default to "No Fee" / $0.00 (see #33757)
+      this.parseStaffPayment({
+        ...draftFiling,
+        header: { ...draftFiling.header, waiveFees: false }
+      } as any)
     }
 
     // NB: Folio Number is mutually exclusive with Staff Payment
