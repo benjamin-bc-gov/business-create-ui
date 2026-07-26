@@ -251,7 +251,9 @@ export default class EffectiveDateTime extends Mixins(DateMixin) {
       // Build the date using createUtcDate so hours/minutes are always interpreted
       // as Pacific time, regardless of the user's local browser timezone.
       const utcDate = new Date(this.dateText + ' 00:00 UTC')
-      const dateToValidate = this.createUtcDate(utcDate.getUTCFullYear(), utcDate.getUTCMonth(), utcDate.getUTCDate(), hours, minutes)
+      const dateToValidate = this.createUtcDate(
+        utcDate.getUTCFullYear(), utcDate.getUTCMonth(), utcDate.getUTCDate(), hours, minutes
+      )
 
       // Set Effective Date
       this.emitEffectiveDate(dateToValidate)
