@@ -238,22 +238,23 @@ export default class EffectiveDateTime extends Mixins(DateMixin) {
   /** Construct the Date Object for storage */
   private constructDate (): void {
     if (this.isFutureEffective && this.dateText) {
-      // Format the selected date string and create Date
-      const dateToValidate = this.yyyyMmDdToDate(this.dateText)
-
       // Create references & Apply time period
       let hours = this.selectHour && +this.selectHour
       const minutes = this.selectMinute && +this.selectMinute
 
       if (this.selectPeriod === 'AM' && +this.selectHour === 12) {
-        dateToValidate.setDate(dateToValidate.getDate() - 1)
-        hours = +this.selectHour + 12
+        hours = 0
       } else if (this.selectPeriod === 'PM' && +this.selectHour !== 12) {
         hours = +this.selectHour + 12
       }
 
-      // Apply selected hours and minutes
-      dateToValidate.setHours(hours, minutes)
+      // Build the date using createUtcDate so hours/minutes are always interpreted
+      // as Pacific time, regardless of the user's local browser timezone.
+      const split = this.dateText.split('-')
+      const year = +split[0]
+      const month = +split[1] - 1
+      const day = +split[2]
+      const dateToValidate = this.createUtcDate(year, month, day, hours, minutes)
 
       // Set Effective Date
       this.emitEffectiveDate(dateToValidate)
