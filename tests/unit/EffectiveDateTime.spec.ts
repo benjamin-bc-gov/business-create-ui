@@ -241,25 +241,13 @@ describe('Effective Date Time component', () => {
   })
 
   describe('constructDate() — effective date is always Pacific time regardless of browser timezone', () => {
-    const TEST_DATE = '2026-05-24'
     const freshDateTime = { valid: false, isFutureEffective: false, effectiveDate: null }
 
-    // Returns the UTC date that createUtcDate produces for given Pacific-time hours/minutes on TEST_DATE.
-    // Used as the reference value so test and implementation stay in sync.
-    function expectedUtcDate (wrapper: any, hours: number, minutes: number): Date {
-      const utcDate = new Date(TEST_DATE + ' 00:00 UTC')
-      return wrapper.vm.createUtcDate(
-        utcDate.getUTCFullYear(), utcDate.getUTCMonth(), utcDate.getUTCDate(), hours, minutes
-      )
-    }
-
-    // Mocks emitEffectiveDate, sets component state, calls constructDate(), and returns
-    // the Date argument passed to emitEffectiveDate.
-    function runConstructDate (wrapper: any, hour: string, minute: string, period: string): Date {
+    function runConstructDate (wrapper: any, date: string, hour: string, minute: string, period: string): Date {
       const mockEmit = vi.fn()
       ;(wrapper.vm as any).emitEffectiveDate = mockEmit
       wrapper.vm.isFutureEffective = true
-      wrapper.vm.dateText = TEST_DATE
+      wrapper.vm.dateText = date
       wrapper.vm.selectHour = hour
       wrapper.vm.selectMinute = minute
       wrapper.vm.selectPeriod = period
@@ -267,40 +255,25 @@ describe('Effective Date Time component', () => {
       return mockEmit.mock.calls.length > 0 ? mockEmit.mock.calls[0][0] : null
     }
 
-    it('produces correct UTC date for 9:10 AM Pacific (the bug scenario)', () => {
-      const wrapper = wrapperFactory({ effectiveDateTime: freshDateTime })
-      const result = runConstructDate(wrapper, '9', '10', 'AM')
-      expect(result.toISOString()).toBe(expectedUtcDate(wrapper, 9, 10).toISOString())
-    })
+    const constructDateTestCases = [
+      { test_name: '9:10 AM Pacific — bug scenario',           date: '2026-05-24', hour: '9',  minute: '10', period: 'AM', expected: '2026-05-24T16:10:00.000Z' },
+      { test_name: '12:00 AM Pacific — midnight',              date: '2026-05-24', hour: '12', minute: '0',  period: 'AM', expected: '2026-05-24T07:00:00.000Z' },
+      { test_name: '12:00 PM Pacific — noon',                  date: '2026-05-24', hour: '12', minute: '0',  period: 'PM', expected: '2026-05-24T19:00:00.000Z' },
+      { test_name: '1:30 AM Pacific',                          date: '2026-05-24', hour: '1',  minute: '30', period: 'AM', expected: '2026-05-24T08:30:00.000Z' },
+      { test_name: '5:45 PM Pacific — rolls into next UTC day',date: '2026-05-24', hour: '5',  minute: '45', period: 'PM', expected: '2026-05-25T00:45:00.000Z' },
+      { test_name: '11:59 PM Pacific',                         date: '2026-05-24', hour: '11', minute: '59', period: 'PM', expected: '2026-05-25T06:59:00.000Z' },
+      { test_name: '11:59 PM Pacific — end of month (Jan 31)', date: '2026-01-31', hour: '11', minute: '59', period: 'PM', expected: '2026-02-01T07:59:00.000Z' },
+      { test_name: '12:00 AM Pacific — start of month (Mar 1)',date: '2026-03-01', hour: '12', minute: '0',  period: 'AM', expected: '2026-03-01T08:00:00.000Z' },
+      { test_name: '11:59 PM Pacific — end of year (Dec 31)',  date: '2026-12-31', hour: '11', minute: '59', period: 'PM', expected: '2027-01-01T07:59:00.000Z' },
+      { test_name: '12:00 AM Pacific — start of year (Jan 1)', date: '2026-01-01', hour: '12', minute: '0',  period: 'AM', expected: '2026-01-01T08:00:00.000Z' },
+    ]
 
-    it('produces correct UTC date for 12:00 AM Pacific (midnight)', () => {
-      const wrapper = wrapperFactory({ effectiveDateTime: freshDateTime })
-      const result = runConstructDate(wrapper, '12', '0', 'AM')
-      expect(result.toISOString()).toBe(expectedUtcDate(wrapper, 0, 0).toISOString())
-    })
-
-    it('produces correct UTC date for 12:00 PM Pacific (noon)', () => {
-      const wrapper = wrapperFactory({ effectiveDateTime: freshDateTime })
-      const result = runConstructDate(wrapper, '12', '0', 'PM')
-      expect(result.toISOString()).toBe(expectedUtcDate(wrapper, 12, 0).toISOString())
-    })
-
-    it('produces correct UTC date for 1:30 AM Pacific', () => {
-      const wrapper = wrapperFactory({ effectiveDateTime: freshDateTime })
-      const result = runConstructDate(wrapper, '1', '30', 'AM')
-      expect(result.toISOString()).toBe(expectedUtcDate(wrapper, 1, 30).toISOString())
-    })
-
-    it('produces correct UTC date for 5:45 PM Pacific', () => {
-      const wrapper = wrapperFactory({ effectiveDateTime: freshDateTime })
-      const result = runConstructDate(wrapper, '5', '45', 'PM')
-      expect(result.toISOString()).toBe(expectedUtcDate(wrapper, 17, 45).toISOString())
-    })
-
-    it('produces correct UTC date for 11:59 PM Pacific', () => {
-      const wrapper = wrapperFactory({ effectiveDateTime: freshDateTime })
-      const result = runConstructDate(wrapper, '11', '59', 'PM')
-      expect(result.toISOString()).toBe(expectedUtcDate(wrapper, 23, 59).toISOString())
-    })
+    for (const { test_name, date, hour, minute, period, expected } of constructDateTestCases) {
+      it(test_name, () => {
+        const wrapper = wrapperFactory({ effectiveDateTime: freshDateTime })
+        const result = runConstructDate(wrapper, date, hour, minute, period)
+        expect(result.toISOString()).toBe(expected)
+      })
+    }
   })
 })
