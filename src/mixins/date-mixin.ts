@@ -51,11 +51,20 @@ export default class DateMixin extends Mixins(CommonMixin) {
     */
 
     const date = new Date(Date.UTC(year, month, day, hours, minutes, ms))
-    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }))
-    const tzDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/vancouver' }))
-    const offset = utcDate.getTime() - tzDate.getTime()
-    date.setTime(date.getTime() + offset)
 
+    // BC permanently adopted Pacific Daylight Time (UTC-7) starting November 1, 2026,
+    // ending seasonal clock changes. For dates on or after this cutoff, always use UTC-7.
+    const BC_PERMANENT_PDT_CUTOFF = new Date(Date.UTC(2026, 10, 1)) // Nov 1, 2026
+    let offset: number
+    if (date >= BC_PERMANENT_PDT_CUTOFF) {
+      offset = 7 * 60 * 60 * 1000 // UTC-7 (permanent PDT)
+    } else {
+      const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }))
+      const tzDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/vancouver' }))
+      offset = utcDate.getTime() - tzDate.getTime()
+    }
+
+    date.setTime(date.getTime() + offset)
     return date
   }
 
@@ -85,6 +94,18 @@ export default class DateMixin extends Mixins(CommonMixin) {
     // safety check
     if (!isDate(date) || isNaN(date.getTime())) return null
 
+    // BC permanently adopted Pacific Daylight Time (UTC-7) starting November 1, 2026.
+    // For dates on or after that cutoff, shift by UTC-7 and format from UTC to stay consistent
+    // with how createUtcDate encodes these dates.
+    const BC_PERMANENT_PDT_CUTOFF = new Date(Date.UTC(2026, 10, 1)) // Nov 1, 2026
+    if (date >= BC_PERMANENT_PDT_CUTOFF) {
+      const pacific = new Date(date.getTime() - 7 * 60 * 60 * 1000)
+      const yyyy = pacific.getUTCFullYear()
+      const mm = String(pacific.getUTCMonth() + 1).padStart(2, '0')
+      const dd = String(pacific.getUTCDate()).padStart(2, '0')
+      return `${yyyy}-${mm}-${dd}`
+    }
+
     // NB: some versions of Node have only en-US locale
     // so use that and convert results accordingly
     const dateStr = date.toLocaleDateString('en-US', {
@@ -111,10 +132,15 @@ export default class DateMixin extends Mixins(CommonMixin) {
     // safety check
     if (!isDate(date) || isNaN(date.getTime())) return null
 
+    // BC permanently adopted Pacific Daylight Time (UTC-7) starting November 1, 2026.
+    // For dates on or after that cutoff, use Etc/GMT+7 so IANA DST rules don't interfere.
+    const BC_PERMANENT_PDT_CUTOFF = new Date(Date.UTC(2026, 10, 1)) // Nov 1, 2026
+    const tz = date >= BC_PERMANENT_PDT_CUTOFF ? 'Etc/GMT+7' : 'America/Vancouver'
+
     // NB: some versions of Node have only en-US locale
     // so use that and convert results accordingly
     let dateStr = date.toLocaleDateString('en-US', {
-      timeZone: 'America/Vancouver',
+      timeZone: tz,
       weekday: showWeekday ? 'long' : undefined, // Thursday or nothing
       month: longMonth ? 'long' : 'short', // December or Dec.
       day: 'numeric', // 31
