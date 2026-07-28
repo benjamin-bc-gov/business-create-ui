@@ -256,20 +256,90 @@ describe('Effective Date Time component', () => {
     }
 
     const constructDateTestCases = [
-      { test_name: '9:10 AM Pacific — bug scenario',           date: '2026-05-24', hour: '9',  minute: '10', period: 'AM', expected: '2026-05-24T16:10:00.000Z' },
-      { test_name: '12:00 AM Pacific — midnight',              date: '2026-05-24', hour: '12', minute: '0',  period: 'AM', expected: '2026-05-24T07:00:00.000Z' },
-      { test_name: '12:00 PM Pacific — noon',                  date: '2026-05-24', hour: '12', minute: '0',  period: 'PM', expected: '2026-05-24T19:00:00.000Z' },
-      { test_name: '1:30 AM Pacific',                          date: '2026-05-24', hour: '1',  minute: '30', period: 'AM', expected: '2026-05-24T08:30:00.000Z' },
-      { test_name: '5:45 PM Pacific — rolls into next UTC day',date: '2026-05-24', hour: '5',  minute: '45', period: 'PM', expected: '2026-05-25T00:45:00.000Z' },
-      { test_name: '11:59 PM Pacific',                         date: '2026-05-24', hour: '11', minute: '59', period: 'PM', expected: '2026-05-25T06:59:00.000Z' },
-      { test_name: '11:59 PM Pacific — end of month (Jan 31)', date: '2026-01-31', hour: '11', minute: '59', period: 'PM', expected: '2026-02-01T07:59:00.000Z' },
-      { test_name: '12:00 AM Pacific — start of month (Mar 1)',date: '2026-03-01', hour: '12', minute: '0',  period: 'AM', expected: '2026-03-01T08:00:00.000Z' },
-      { test_name: '11:59 PM Pacific — end of year (Dec 31)',  date: '2026-12-31', hour: '11', minute: '59', period: 'PM', expected: '2027-01-01T07:59:00.000Z' },
-      { test_name: '12:00 AM Pacific — start of year (Jan 1)', date: '2026-01-01', hour: '12', minute: '0',  period: 'AM', expected: '2026-01-01T08:00:00.000Z' },
+      {
+        testName: '9:10 AM Pacific — bug scenario',
+        date: '2026-05-24',
+        hour: '9',
+        minute: '10',
+        period: 'AM',
+        expected: '2026-05-24T16:10:00.000Z'
+      },
+      {
+        testName: '12:00 AM Pacific — midnight',
+        date: '2026-05-24',
+        hour: '12',
+        minute: '0',
+        period: 'AM',
+        expected: '2026-05-24T07:00:00.000Z'
+      },
+      {
+        testName: '12:00 PM Pacific — noon',
+        date: '2026-05-24',
+        hour: '12',
+        minute: '0',
+        period: 'PM',
+        expected: '2026-05-24T19:00:00.000Z'
+      },
+      {
+        testName: '1:30 AM Pacific',
+        date: '2026-05-24',
+        hour: '1',
+        minute: '30',
+        period: 'AM',
+        expected: '2026-05-24T08:30:00.000Z'
+      },
+      {
+        testName: '5:45 PM Pacific — rolls into next UTC day',
+        date: '2026-05-24',
+        hour: '5',
+        minute: '45',
+        period: 'PM',
+        expected: '2026-05-25T00:45:00.000Z'
+      },
+      {
+        testName: '11:59 PM Pacific',
+        date: '2026-05-24',
+        hour: '11',
+        minute: '59',
+        period: 'PM',
+        expected: '2026-05-25T06:59:00.000Z'
+      },
+      {
+        testName: '11:59 PM Pacific — end of month (Jan 31)',
+        date: '2026-01-31',
+        hour: '11',
+        minute: '59',
+        period: 'PM',
+        expected: '2026-02-01T07:59:00.000Z'
+      },
+      {
+        testName: '12:00 AM Pacific — start of month (Mar 1)',
+        date: '2026-03-01',
+        hour: '12',
+        minute: '0',
+        period: 'AM',
+        expected: '2026-03-01T08:00:00.000Z'
+      },
+      {
+        testName: '11:59 PM Pacific — end of year (Dec 31)',
+        date: '2026-12-31',
+        hour: '11',
+        minute: '59',
+        period: 'PM',
+        expected: '2027-01-01T07:59:00.000Z'
+      },
+      {
+        testName: '12:00 AM Pacific — start of year (Jan 1)',
+        date: '2026-01-01',
+        hour: '12',
+        minute: '0',
+        period: 'AM',
+        expected: '2026-01-01T08:00:00.000Z'
+      }
     ]
 
-    for (const { test_name, date, hour, minute, period, expected } of constructDateTestCases) {
-      it(test_name, () => {
+    for (const { testName, date, hour, minute, period, expected } of constructDateTestCases) {
+      it(testName, () => {
         const wrapper = wrapperFactory({ effectiveDateTime: freshDateTime })
         const result = runConstructDate(wrapper, date, hour, minute, period)
         expect(result.toISOString()).toBe(expected)
