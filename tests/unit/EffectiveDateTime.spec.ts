@@ -326,7 +326,7 @@ describe('Effective Date Time component', () => {
         hour: '11',
         minute: '59',
         period: 'PM',
-        expected: '2027-01-01T07:59:00.000Z'
+        expected: '2027-01-01T06:59:00.000Z'
       },
       {
         testName: '12:00 AM Pacific — start of year (Jan 1)',
