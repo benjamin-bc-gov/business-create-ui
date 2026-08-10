@@ -32,7 +32,6 @@ describe('Email Rules', () => {
       ['test@example.co.uk'],
       ['user@[192.168.1.1]'],
       ['no_one@never.get'],
-      ['"quoted"@example.com'],
       ["john.o'smith@gov.bc.ca"]
     ])('returns true for valid email: %s', (email) => {
       expect(validEmailRule(email)).toBe(true)
@@ -46,7 +45,14 @@ describe('Email Rules', () => {
       ['test@'],
       ['test@domain'],
       ['test @example.com'],
-      ['test@ example.com']
+      ['test@ example.com'],
+      ['test@-example.com'],
+      ['test@example-.com'],
+      ['test@[999.999.999.999]'],
+      ['"hello world"@example.com'],
+      ['"quoted"@example.com'],
+      ['tëst@example.com'],
+      ['aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com']
     ])('returns error message for invalid email: %s', (email) => {
       expect(validEmailRule(email)).toBe('Valid email is required')
     })
