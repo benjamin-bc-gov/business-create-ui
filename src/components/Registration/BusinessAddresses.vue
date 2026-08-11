@@ -331,11 +331,14 @@ export default class BusinessAddresses extends Mixins(CommonMixin) {
     // only show errors in editing mode
     if (this.showErrors && this.isEditing) {
       // validate mailing address
-      await this.$refs.mailingAddress.validate()
+      // NB: use validate()'s return value — base-address 2.2.9+ doesn't emit "valid"
+      // for an untouched valid address, so the flags may still hold their initial false
+      this.mailingAddressValid = await this.$refs.mailingAddress.validate()
       if (!this.inheritMailingAddress) {
         // validate delivery address
-        await this.$refs.deliveryAddress.validate()
+        this.deliveryAddressValid = await this.$refs.deliveryAddress.validate()
       }
+      this.emitValid()
     }
   }
 
