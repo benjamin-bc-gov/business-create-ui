@@ -1,7 +1,6 @@
 import sinon from 'sinon'
 import LegalServices from '@/services/legal-services'
 import { AxiosInstance as axios } from '@/utils'
-import * as FeatureFlags from '@/utils/feature-flag-utils'
 import { DocumentTypes, FilingTypes } from '@/enums'
 import { CorpTypeCd } from '@bcrs-shared-components/corp-type-module'
 
@@ -137,9 +136,7 @@ describe('Legal Services', () => {
     // FUTURE
   })
 
-  it('uploads a document to DRS when the drs-upload feature is enabled', async () => {
-    vi.spyOn(FeatureFlags, 'GetFeatureFlag').mockReturnValue('incorporationApplication-completingParty,drs-upload')
-
+  it('uploads a document to DRS', async () => {
     // mock DRS upload response
     const post = sinon.stub(axios, 'post')
     post.withArgs('https://business-api.url/documents/client/dissolution/CP/affidavit')
@@ -166,51 +163,8 @@ describe('Legal Services', () => {
   })
 
   it('throws when the DRS document upload fails', async () => {
-    vi.spyOn(FeatureFlags, 'GetFeatureFlag').mockReturnValue('incorporationApplication-completingParty,drs-upload')
-
     // mock DRS upload error
     sinon.stub(axios, 'post').rejects(new Error('went wrong'))
-
-    const file = new File(['data'], 'affidavit.pdf', { type: 'application/pdf' })
-    await expect(
-      LegalServices.uploadDocument(file, FilingTypes.DISSOLUTION, CorpTypeCd.COOP,
-        DocumentTypes.AFFIDAVIT, 'keycloak-guid', 'CP1002605', 111)
-    ).rejects.toThrow()
-  })
-
-  it('uploads a document via Minio when the drs-upload feature is disabled', async () => {
-    vi.spyOn(FeatureFlags, 'GetFeatureFlag').mockReturnValue('incorporationApplication-completingParty')
-
-    // mock presigned url + Minio upload responses
-    sinon.stub(axios, 'get').withArgs('https://business-api.url/documents/affidavit.pdf/signatures')
-      .resolves({
-        data: {
-          preSignedUrl: 'https://minio.url/affidavit.pdf',
-          key: 'minio-key-123'
-        }
-      })
-    sinon.stub(axios, 'put').withArgs('https://minio.url/affidavit.pdf')
-      .resolves({ status: 200 })
-
-    const file = new File(['data'], 'affidavit.pdf', { type: 'application/pdf' })
-    const doc = await LegalServices.uploadDocument(file, FilingTypes.DISSOLUTION, CorpTypeCd.COOP,
-      DocumentTypes.AFFIDAVIT, 'keycloak-guid', 'CP1002605', 111)
-
-    expect(doc.key).toBe('minio-key-123')
-  })
-
-  it('throws when the Minio document upload fails', async () => {
-    vi.spyOn(FeatureFlags, 'GetFeatureFlag').mockReturnValue('')
-
-    // mock presigned url response + Minio upload error
-    sinon.stub(axios, 'get').withArgs('https://business-api.url/documents/affidavit.pdf/signatures')
-      .resolves({
-        data: {
-          preSignedUrl: 'https://minio.url/affidavit.pdf',
-          key: 'minio-key-123'
-        }
-      })
-    sinon.stub(axios, 'put').rejects(new Error('went wrong'))
 
     const file = new File(['data'], 'affidavit.pdf', { type: 'application/pdf' })
     await expect(
