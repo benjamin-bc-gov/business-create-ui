@@ -68,7 +68,6 @@ export * from './utils-interfaces/document-upload-interface'
 export * from './utils-interfaces/form-field-type'
 export * from './utils-interfaces/key-value-interface'
 export * from './utils-interfaces/pdf-info-interface'
-export * from './utils-interfaces/presigned-url-interface'
 export * from './utils-interfaces/validation-detail-interface'
 export * from './utils-interfaces/validation-item-detail-interface'
 
